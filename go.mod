@@ -1,4 +1,4 @@
-module file-tracer
+module tracer
 
 go 1.20
 

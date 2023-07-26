@@ -33,6 +33,11 @@ func ExtractZip(filename string, patten string) (tempDir string, err error) {
 	}
 
 	for _, file := range zipFile.Reader.File {
+		// 忽略目录
+		if file.FileInfo().IsDir() {
+			continue
+		}
+
 		var (
 			dstPath = filepath.Join(tempDir, file.Name)
 
@@ -74,10 +79,10 @@ func ExtractZip(filename string, patten string) (tempDir string, err error) {
 	return tempDir, nil
 }
 
-// CompressDir 压缩文件夹
+// CompressZip 压缩文件夹
 // dir: 目录名
 // filename: 压缩文件名
-func CompressDir(dir string, filename string) (err error) {
+func CompressZip(dir string, filename string) (err error) {
 	var (
 		dstFile   *os.File
 		dstWriter *zip.Writer
@@ -173,7 +178,7 @@ func ReadXml(filename string) (document *etree.Document, err error) {
 	return document, nil
 }
 
-// WriteXml 写入 xml 文件
+// WriteXml 输出 xml 文件
 // doc: etree.Document 对象
 // filename: 文件名
 func WriteXml(document *etree.Document, filename string) error {
@@ -185,4 +190,25 @@ func WriteXml(document *etree.Document, filename string) error {
 		}
 	}
 	return document.WriteToFile(filename)
+}
+
+func CreateDir(dir string) (err error) {
+	if _, err = os.Stat(dir); err != nil {
+		err = os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func SubFileCount(dir string) (num int, err error) {
+	var fileInfoList []os.DirEntry
+	fileInfoList, err = os.ReadDir(dir)
+	if err != nil {
+		return 0, err
+	}
+
+	return len(fileInfoList), nil
 }

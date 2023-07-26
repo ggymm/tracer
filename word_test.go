@@ -17,7 +17,7 @@ func TestChangeXml(t *testing.T) {
 	)
 
 	// 解压文件
-	tempDir, err = ExtractZip("test-data/file.docx", "file-trace-*")
+	tempDir, err = ExtractZip("testdata/file.docx", "file-trace-*")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,8 +58,19 @@ func TestChangeXml(t *testing.T) {
 }
 
 func TestGenerateTracerDocx(t *testing.T) {
-	srcFile := "test-data/file.docx"
-	dstFile := "test-data/file-trace.docx"
+	srcFile := "example/source.docx"
+	dstFile := "example/tracer.docx"
+	traceUrl := "http://localhost:9090/trace"
+	err := GenerateTracerDocx(srcFile, dstFile, traceUrl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log("ok")
+}
+
+func TestGenerateTracerDocx2(t *testing.T) {
+	srcFile := "example/tracer.docx"
+	dstFile := "example/tracer2.docx"
 	traceUrl := "http://localhost:9090/trace"
 	err := GenerateTracerDocx(srcFile, dstFile, traceUrl)
 	if err != nil {
