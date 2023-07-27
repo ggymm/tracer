@@ -1,0 +1,10 @@
+./TraceFile -i source.docx -o tracer.docx -u http://localhost:9090/trace -t office
+./TraceFile -i tracer.docx -o tracer-tracer.docx -u http://localhost:9090/trace -t office
+
+./TraceFile -i source.xlsx -o tracer.xlsx -u http://localhost:9090/trace -t office
+./TraceFile -i source-image.xlsx -o tracer-image.xlsx -u http://localhost:9090/trace -t office
+
+./TraceFile -i source.pptx -o tracer.pptx -u http://localhost:9090/trace -t office
+./TraceFile -i source-image.pptx -o tracer-image.pptx -u http://localhost:9090/trace -t office
+
+./TraceFile -i ConsoleApplication2.exe -o ConsoleApplication2.exe-trace.exe -u http://localhost:9090/trace -t exe

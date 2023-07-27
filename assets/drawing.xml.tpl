@@ -8,11 +8,11 @@
     <xdr:ext cx="9525" cy="9525"/>
     <xdr:pic>
         <xdr:nvPicPr>
-            <xdr:cNvPr descr="Picture" id="${no}" name="Image ${no}"/>
+            <xdr:cNvPr descr="Picture" id="${id}" name="Image ${id}"/>
             <xdr:cNvPicPr/>
         </xdr:nvPicPr>
         <xdr:blipFill>
-            <a:blip cstate="print" r:embed="rId${no}"/>
+            <a:blip cstate="print" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId${id}"/>
             <a:stretch>
                 <a:fillRect/>
             </a:stretch>
@@ -44,7 +44,7 @@
             </xdr:cNvPicPr>
         </xdr:nvPicPr>
         <xdr:blipFill>
-            <a:blip r:link="rId9999"/>
+            <a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:link="rId9999"/>
             <a:stretch>
                 <a:fillRect/>
             </a:stretch>
