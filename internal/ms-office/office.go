@@ -1,4 +1,4 @@
-package main
+package ms_office
 
 import (
 	_ "embed"
@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"tracer/internal/assets"
+	"tracer/pkg/utils"
 
 	"github.com/beevik/etree"
 )
@@ -30,7 +33,7 @@ func GenTracerDOCX(srcFile, dstFile, traceUrl string) (err error) {
 	)
 
 	// 1、解压 docx 文件
-	tempDir, err = ExtractZip(srcFile, "file-trace-*")
+	tempDir, err = utils.ExtractZip(srcFile, "file-trace-*")
 	if err != nil {
 		return err
 	}
@@ -46,7 +49,7 @@ func GenTracerDOCX(srcFile, dstFile, traceUrl string) (err error) {
 		}
 	} else {
 		// 读取文件
-		document, err = ReadXml(relsFile)
+		document, err = utils.ReadXml(relsFile)
 		if err != nil {
 			return err
 		}
@@ -80,7 +83,7 @@ func GenTracerDOCX(srcFile, dstFile, traceUrl string) (err error) {
 		}
 
 		// 更新 settings.xml.rels 文件
-		err = WriteXml(document, relsFile)
+		err = utils.WriteXml(document, relsFile)
 		if err != nil {
 			return err
 		}
@@ -88,7 +91,7 @@ func GenTracerDOCX(srcFile, dstFile, traceUrl string) (err error) {
 
 	// 3、修改 settings.xml 文件
 	xmlFile := filepath.Join(tempDir, "word", "settings.xml")
-	document, err = ReadXml(xmlFile)
+	document, err = utils.ReadXml(xmlFile)
 	if err != nil {
 		return err
 	}
@@ -115,13 +118,13 @@ func GenTracerDOCX(srcFile, dstFile, traceUrl string) (err error) {
 	}
 
 	// 更新 settings.xml 文件
-	err = WriteXml(document, xmlFile)
+	err = utils.WriteXml(document, xmlFile)
 	if err != nil {
 		return err
 	}
 
 	// 4、压缩文件夹，生成新的 docx 文件
-	err = CompressZip(tempDir, dstFile)
+	err = utils.CompressZip(tempDir, dstFile)
 	if err != nil {
 		return err
 	}
@@ -133,9 +136,6 @@ func GenTracerDOCX(srcFile, dstFile, traceUrl string) (err error) {
 	}
 	return nil
 }
-
-//go:embed assets/slide.xml.tpl
-var pptxSlideTpl string
 
 const pptxTraceId = "rId9999"
 const pptxTraceType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
@@ -156,7 +156,7 @@ func GenTracerPPTX(srcFile, dstFile, traceUrl string) (err error) {
 	)
 
 	// 1、解压 pptx 文件
-	tempDir, err = ExtractZip(srcFile, "file-trace-*")
+	tempDir, err = utils.ExtractZip(srcFile, "file-trace-*")
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func GenTracerPPTX(srcFile, dstFile, traceUrl string) (err error) {
 		}
 	} else {
 		// 读取文件
-		document, err = ReadXml(relsFile)
+		document, err = utils.ReadXml(relsFile)
 		if err != nil {
 			return err
 		}
@@ -206,7 +206,7 @@ func GenTracerPPTX(srcFile, dstFile, traceUrl string) (err error) {
 		}
 
 		// 更新 slide1.xml.rels 文件
-		err = WriteXml(document, relsFile)
+		err = utils.WriteXml(document, relsFile)
 		if err != nil {
 			return err
 		}
@@ -214,7 +214,7 @@ func GenTracerPPTX(srcFile, dstFile, traceUrl string) (err error) {
 
 	// 3、修改 slide1.xml 文件
 	xmlFile := filepath.Join(tempDir, "ppt", "slides", "slide1.xml")
-	document, err = ReadXml(xmlFile)
+	document, err = utils.ReadXml(xmlFile)
 	if err != nil {
 		return err
 	}
@@ -232,11 +232,11 @@ func GenTracerPPTX(srcFile, dstFile, traceUrl string) (err error) {
 	if !exist {
 		tree := document.FindElement("//p:sld/p:cSld/p:spTree")
 		nodeId := strconv.Itoa(len(tree.ChildElements()) + 1)
-		pptxSlideTpl = strings.Replace(pptxSlideTpl, "${id}", nodeId, -1)
-		pptxSlideTpl = strings.Replace(pptxSlideTpl, "${pptxTraceId}", pptxTraceId, -1)
+		assets.MSSlideTpl = strings.Replace(assets.MSSlideTpl, "${id}", nodeId, -1)
+		assets.MSSlideTpl = strings.Replace(assets.MSSlideTpl, "${pptxTraceId}", pptxTraceId, -1)
 
 		n := etree.NewDocument()
-		err = n.ReadFromString(pptxSlideTpl)
+		err = n.ReadFromString(assets.MSSlideTpl)
 		if err != nil {
 			return err
 		}
@@ -244,13 +244,13 @@ func GenTracerPPTX(srcFile, dstFile, traceUrl string) (err error) {
 	}
 
 	// 更新 slide1.xml 文件
-	err = WriteXml(document, xmlFile)
+	err = utils.WriteXml(document, xmlFile)
 	if err != nil {
 		return err
 	}
 
 	// 4、压缩文件夹，生成新的 pptx 文件
-	err = CompressZip(tempDir, dstFile)
+	err = utils.CompressZip(tempDir, dstFile)
 	if err != nil {
 		return err
 	}
@@ -262,15 +262,6 @@ func GenTracerPPTX(srcFile, dstFile, traceUrl string) (err error) {
 	}
 	return err
 }
-
-//go:embed assets/ninelock.png
-var markImage []byte
-
-//go:embed assets/drawing.xml
-var xlsxDrawing []byte
-
-//go:embed assets/drawing.xml.tpl
-var xlsxDrawingTpl string
 
 const xlsxTraceId = "rId9999"
 const xlsxTraceType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
@@ -307,26 +298,26 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 	)
 
 	// 1、解压 xlsx 文件
-	tempDir, err = ExtractZip(srcFile, "file-trace-*")
+	tempDir, err = utils.ExtractZip(srcFile, "file-trace-*")
 	if err != nil {
 		return err
 	}
 
 	// 2、添加图片
 	mediaDir = filepath.Join(tempDir, "xl", "media")
-	err = CreateDir(mediaDir)
+	err = utils.CreateDir(mediaDir)
 	if err != nil {
 		return err
 	}
 
-	count, err = SubFileCount(mediaDir)
+	count, err = utils.SubFileCount(mediaDir)
 	if err != nil {
 		return err
 	}
 
 	xlsxImageId = fmt.Sprintf("rId%d", count+1)
 	xlsxImageName = fmt.Sprintf("image%d.png", count+1)
-	err = os.WriteFile(filepath.Join(mediaDir, xlsxImageName), markImage, os.ModePerm)
+	err = os.WriteFile(filepath.Join(mediaDir, xlsxImageName), assets.MSMarkImage, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -334,7 +325,7 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 	// 3、添加/修改 drawing1.xml，drawing1.xml.rels 文件
 	drawingsDir = filepath.Join(tempDir, "xl", "drawings")
 	drawingsRelsDir = filepath.Join(tempDir, "xl", "drawings", "_rels")
-	err = CreateDir(drawingsRelsDir)
+	err = utils.CreateDir(drawingsRelsDir)
 	if err != nil {
 		return err
 	}
@@ -352,7 +343,7 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 
 		// 添加 png 到 [Content_Types].xml 文件
 		typesFile := filepath.Join(tempDir, "[Content_Types].xml")
-		document, err = ReadXml(typesFile)
+		document, err = utils.ReadXml(typesFile)
 		if err != nil {
 			return err
 		}
@@ -364,13 +355,13 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 		types.AddChild(node)
 
 		// 更新 [Content_Types].xml 文件
-		err = WriteXml(document, typesFile)
+		err = utils.WriteXml(document, typesFile)
 		if err != nil {
 			return err
 		}
 	} else {
 		// 读取文件
-		document, err = ReadXml(relsFile)
+		document, err = utils.ReadXml(relsFile)
 		if err != nil {
 			return err
 		}
@@ -412,7 +403,7 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 		}
 
 		// 更新 drawing1.xml.rels 文件
-		err = WriteXml(document, relsFile)
+		err = utils.WriteXml(document, relsFile)
 		if err != nil {
 			return err
 		}
@@ -422,14 +413,14 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 		if count == 0 {
 			// 创建文件
 			// 添加追踪信息
-			err = os.WriteFile(xmlFile, xlsxDrawing, os.ModePerm)
+			err = os.WriteFile(xmlFile, assets.MSDrawing, os.ModePerm)
 			if err != nil {
 				return err
 			}
 
 			// 添加 drawing1.xml 到 [Content_Types].xml 文件
 			typesFile := filepath.Join(tempDir, "[Content_Types].xml")
-			document, err = ReadXml(typesFile)
+			document, err = utils.ReadXml(typesFile)
 			if err != nil {
 				return err
 			}
@@ -441,7 +432,7 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 			types.AddChild(node)
 
 			// 更新 [Content_Types].xml 文件
-			err = WriteXml(document, typesFile)
+			err = utils.WriteXml(document, typesFile)
 			if err != nil {
 				return err
 			}
@@ -456,10 +447,10 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 		}
 
 		if !strings.Contains(string(xmlContent), xlsxTraceId) {
-			xlsxDrawingTpl = strings.Replace(xlsxDrawingTpl, "${id}", strconv.Itoa(count+1), -1)
-			xlsxDrawingTpl = ">" + xlsxDrawingTpl + "</xdr:wsDr>"
+			assets.MSDrawingTpl = strings.Replace(assets.MSDrawingTpl, "${id}", strconv.Itoa(count+1), -1)
+			assets.MSDrawingTpl = ">" + assets.MSDrawingTpl + "</xdr:wsDr>"
 
-			current := strings.Replace(string(xmlContent), "></xdr:wsDr>", xlsxDrawingTpl, -1)
+			current := strings.Replace(string(xmlContent), "></xdr:wsDr>", assets.MSDrawingTpl, -1)
 
 			err = os.WriteFile(xmlFile, []byte(current), os.ModePerm)
 			if err != nil {
@@ -471,7 +462,7 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 	// 4、添加/修改 sheet1.xml，sheet1.xml.rels 文件
 	sheetDir = filepath.Join(tempDir, "xl", "worksheets")
 	sheetRelsDir = filepath.Join(tempDir, "xl", "worksheets", "_rels")
-	err = CreateDir(sheetRelsDir)
+	err = utils.CreateDir(sheetRelsDir)
 	if err != nil {
 		return err
 	}
@@ -488,7 +479,7 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 	}
 
 	if _, err = os.Stat(xmlFile); err == nil {
-		document, err = ReadXml(xmlFile)
+		document, err = utils.ReadXml(xmlFile)
 		if err != nil {
 			return err
 		}
@@ -511,7 +502,7 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 			workSheet.AddChild(node)
 
 			// 更新 sheet1.xml 文件
-			err = WriteXml(document, xmlFile)
+			err = utils.WriteXml(document, xmlFile)
 			if err != nil {
 				return err
 			}
@@ -519,7 +510,7 @@ func GenTracerXLSX(srcFile, dstFile, traceUrl string) (err error) {
 	}
 
 	// 5、压缩文件夹，生成新的 xlsx 文件
-	err = CompressZip(tempDir, dstFile)
+	err = utils.CompressZip(tempDir, dstFile)
 	if err != nil {
 		return err
 	}

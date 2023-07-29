@@ -1,8 +1,7 @@
-package main
+package utils
 
 import (
 	"archive/zip"
-	"github.com/beevik/etree"
 	"io"
 	"os"
 	"path/filepath"
@@ -164,51 +163,4 @@ func CompressZip(dir string, filename string) (err error) {
 	}
 
 	return nil
-}
-
-// ReadXml 读取 xml 文件
-// filename: 文件名
-func ReadXml(filename string) (document *etree.Document, err error) {
-	document = etree.NewDocument()
-	err = document.ReadFromFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	return document, nil
-}
-
-// WriteXml 输出 xml 文件
-// doc: etree.Document 对象
-// filename: 文件名
-func WriteXml(document *etree.Document, filename string) error {
-	// 如果文件存在，则删除
-	if _, err := os.Stat(filename); err == nil {
-		err = os.Remove(filename)
-		if err != nil {
-			return err
-		}
-	}
-	return document.WriteToFile(filename)
-}
-
-func CreateDir(dir string) (err error) {
-	if _, err = os.Stat(dir); err != nil {
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func SubFileCount(dir string) (num int, err error) {
-	var fileInfoList []os.DirEntry
-	fileInfoList, err = os.ReadDir(dir)
-	if err != nil {
-		return 0, err
-	}
-
-	return len(fileInfoList), nil
 }
